@@ -7,8 +7,6 @@
 4. [Instalação Local](#instalação-local)
 5. [Deploy no Streamlit Cloud](#deploy-no-streamlit-cloud)
 6. [Uso do Dashboard](#uso-do-dashboard)
-7. [Solução de Problemas](#solução-de-problemas)
-
 ---
 
 ## 🎯 Visão Geral
@@ -99,7 +97,7 @@ Crie um arquivo `requirements.txt` com o seguinte conteúdo:
 
 ```txt
 streamlit==1.29.0
-pandas==2.1.4
+pandas==2.3.3
 requests==2.31.0
 plotly==5.18.0
 ```
@@ -112,7 +110,7 @@ plotly==5.18.0
 Dashboard interativo para análise de criptomoedas em tempo real.
 
 ## 🚀 Acesso Online
-[Link do Dashboard](https://seu-app.streamlit.app)
+[Link do Dashboard](https://cryptodashboard-s9to9g4ywatqk7wy5euqxe.streamlit.app/)
 
 ## 🛠️ Tecnologias
 - Python 3.8+
