@@ -1,0 +1,92 @@
+---
+title: '**Análise de Criptomoedas com Python**'
+abstract: ""
+author: "Luiz Henrique"
+lang: pt
+language: 
+  toc-title-document: '<a href="https://analisemacro.com.br/" target="_blank"><img src="https://analisemacro.com.br/wp-content/uploads/dlm_uploads/2021/10/logo_am.png" alt="Logotipo Análise Macro" width="150"></a>'
+format: 
+  html:
+    toc: true
+    embed-resources: true
+    page-layout: full
+    fig-asp: 0.618
+    fig-width: 6
+    fig-height: 5
+    fig-align: center
+    df-print: kable
+theme:
+  light: flatly
+  dark: darkly
+execute:
+  eval: false
+  message: false
+  warning: false
+---
+
+### Introdução
+
+No cenário atual dos mercados financeiros, a volatilidade e o volume de dados gerados pelos criptoativos exigem ferramentas robustas para monitoramento e tomada de decisão ágil. A capacidade de sintetizar fluxos de dados contínuos em visualizações interpretáveis é uma competência essencial para analistas quantitativos e pesquisadores de mercado.
+
+A utilização da linguagem Python consolidou-se como o padrão industrial para tais tarefas, devido ao seu vasto ecossistema de bibliotecas para manipulação de dados e computação científica. Este artigo detalha o desenvolvimento de uma ferramenta analítica interativa (Dashboard) capaz de automatizar o processo de extração, transformação e carregamento (ETL) de dados de criptomoedas, oferecendo uma visão macro e microeconômica do mercado em tempo real.
+
+### Motivação
+
+A análise manual de ativos digitais através de múltiplas plataformas é ineficiente e propensa a latência informacional. Para gestores de portfólio e pesquisadores, a necessidade não é apenas acessar o preço atual, mas compreender a distribuição de capital (Market Cap), o volume de negociação e as tendências históricas de curto e médio prazo de forma centralizada.
+
+Além disso, a dependência de interfaces de terceiros limita a personalização da análise. A motivação para este exercício reside na criação de uma infraestrutura proprietária e leve, que permita a customização de métricas e o controle sobre a frequência de atualização dos dados, contornando a fragmentação de informações típica do ecossistema cripto.
+
+### Objetivo
+
+O objetivo principal deste exercício é construir um dashboard interativo utilizando a biblioteca **Streamlit** em Python. A aplicação deve satisfazer os seguintes requisitos técnicos:
+
+1.  **Coleta Automatizada:** Conexão via API (CoinGecko) para extração de dados fundamentais e de preço.
+2.  **Tratamento de Dados:** Limpeza, tipagem e estruturação dos dados brutos em DataFrames (Pandas).
+3.  **Visualização Avançada:** Geração de gráficos interativos (Plotly) para análise de distribuição de mercado e séries temporais.
+4.  **Rotina de Atualização:** Implementação de um loop de atualização automática (polling) para garantir a fidelidade dos dados em tempo real, respeitando os limites de requisição da API.
+
+### Dados e Metodologia
+
+A arquitetura da solução foi desenvolvida inteiramente em **Python**, utilizando uma abordagem modular para separar a lógica de requisição, o processamento de dados e a camada de apresentação.
+
+**1. Fonte de Dados e Extração**
+Os dados são obtidos através da API pública do CoinGecko. Utilizou-se a biblioteca `requests` para realizar chamadas aos endpoints de mercado (`/coins/markets`) e dados históricos (`/coins/{id}/market_chart`).
+Para mitigar o risco de bloqueio por excesso de requisições (*Rate Limiting* — erro HTTP 429), implementou-se uma estratégia de tratamento de exceções e *backoff*, além do uso de cache.
+
+**2. Gestão de Cache e Performance**
+Dada a natureza síncrona do Streamlit, a performance foi otimizada através do decorador `@st.cache_data`.
+*   **Dados de Mercado:** Cache com TTL (*Time To Live*) de 60 segundos.
+*   **Dados Históricos:** Cache com TTL de 300 segundos (5 minutos), visto que a granularidade histórica exige menos atualizações frequentes e consome mais recursos da API.
+
+**3. Tratamento e Estruturação (Pandas)**
+Os dados brutos em formato JSON são convertidos imediatamente para objetos `DataFrame` do Pandas. Nesta etapa, realizam-se:
+*   Verificação de integridade das colunas essenciais (Preço, Market Cap, Volume).
+*   Conversão de *timestamps* UNIX para objetos `datetime`.
+*   Tratamento de valores nulos (`NaN`) para evitar falhas na renderização gráfica.
+
+**4. Visualização (Plotly)**
+A biblioteca `plotly.express` e `plotly.graph_objects` foi escolhida pela capacidade de gerar gráficos vetoriais interativos (zoom, hover, pan), essenciais para análise financeira detalhada.
+
+**5. Rotina de Atualização Automática**
+Diferente de scripts estáticos, o dashboard possui uma rotina de atualização configurável pelo usuário. Utilizando a função `st.rerun()` combinada com um controle de tempo (`time.sleep`), a aplicação recarrega os dados periodicamente sem intervenção manual, simulando um comportamento de *streaming* de dados.
+
+### Resultados: O Dashboard em Funcionamento
+
+A implementação resultou em uma ferramenta analítica dividida em três camadas de profundidade:
+
+**A. Visão Geral do Mercado (Macro)**
+O topo do dashboard apresenta métricas agregadas calculadas via Pandas, como o Market Cap Total Global, Volume de 24h e a Dominância do Bitcoin. Indicadores de variação média permitem aferir o "sentimento" geral do mercado instantaneamente.
+
+**B. Análise Comparativa e Distribuição**
+Através de gráficos de barras e pizza, é possível visualizar a concentração de capital entre os Top 10 ativos. A análise visual demonstrou claramente a lei de potência (Power Law) típica de mercados financeiros, onde uma pequena parcela dos ativos (Bitcoin e Ethereum) detém a vasta maioria da capitalização de mercado.
+
+**C. Análise Individual e Séries Temporais**
+Ao selecionar um ativo específico, o algoritmo busca dados históricos e plota a curva de preços. A implementação de abas (Tabs) permitiu alternar entre janelas de tempo (7 dias vs 30 dias) sem poluir a interface. Observou-se que a utilização de dados "sparkline" (vetores de preço simplificados fornecidos na chamada inicial) otimizou drasticamente o tempo de carregamento para visualizações de curto prazo, reduzindo a necessidade de chamadas adicionais à API.
+
+![](img.png)
+
+### Consideração Final
+
+O exercício demonstrou a eficácia do Python na construção rápida de ferramentas de monitoramento financeiro complexas. A combinação de `Pandas` para manipulação algébrica de dados e `Streamlit` para o *frontend* permite que pesquisadores e profissionais do mercado financeiro prototipem soluções de *Business Intelligence* sem a necessidade de equipes de desenvolvimento web dedicadas.
+
+Um ponto crítico observado foi a gestão de limites da API. Em ambientes de produção ou alta frequência, recomenda-se a migração para APIs pagas ou a implementação de um banco de dados intermediário (SQL/NoSQL) para armazenar o histórico, reduzindo a dependência de requisições externas em tempo real. Contudo, para fins de análise exploratória e monitoramento acadêmico, a arquitetura proposta atende plenamente aos requisitos de automação e confiabilidade dos dados.
